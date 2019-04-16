@@ -58,6 +58,14 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
 
       // Drawer setup
       self.toggleDrawer = function() {
+        var currentPage = document.getElementsByClassName('oj-navigationlist-item-element oj-navigationlist-item oj-selected')[0];
+        if (currentPage.key == "dashboard") {
+          var mapDiv = document.getElementById('container');
+          mapDiv.style.display = "block";
+        } else {
+          var mapDiv = document.getElementById('container');
+          mapDiv.style.display = "none";
+        }
         return oj.OffcanvasUtils.toggle({selector: '#navDrawer', modality: 'modal', content: '#pageContent'});
       }
       // Add a close listener so we can move focus back to the toggle button when the drawer closes
