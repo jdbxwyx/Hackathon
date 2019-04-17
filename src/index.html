@@ -107,6 +107,16 @@
         marker.setContent(markerContent); //更新点标记内容
         // marker.setPosition([116.391467, 39.927761]); //更新点标记位置
 
+          AMap.plugin([
+            'AMap.ToolBar',
+          ], function () {
+            // 在图面添加工具条控件，工具条控件集成了缩放、平移、定位等功能按钮在内的组合控件
+            map.addControl(new AMap.ToolBar({
+              // 简易缩放模式，默认为 false
+              liteStyle: true
+            }));
+          });
+
     </script>
     <!-- template for rendering navigation items in the drawer -->
     <script type="text/html" id="navTemplate">
