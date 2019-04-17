@@ -101,10 +101,11 @@
   <body>
     <div id="container"  style="display:none"></div>
     
-    <div class="input-card" style="width:24rem;">
+    <div class="input-card">
       <div class="input-item">
         <button class="btn" id="btn_search" style="margin-right:1rem;">Search</button>
-        <button class="btn" id="btn_guide">Guide</button>
+        <button class="btn" id="btn_guide" style="margin-right:1rem;">Guide</button>
+        <button class="btn" id="btn_clear" >Clear</button>
       </div>
     </div>
 
@@ -121,27 +122,14 @@
           zoom:15, //初始化地图层级
           center: [118.822238, 31.936685] //初始化地图中心点
       });
+
+      // current location
       var marker = new AMap.Marker({
           icon: "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
           position: [118.822238,31.936685],
           offset: new AMap.Pixel(-13, -30)
       });
       marker.setMap(map);
-      
-      //构造路线导航类
-      var driving = new AMap.Driving({
-          map: map,
-          panel: "panel"
-      }); 
-      // 根据起终点经纬度规划驾车导航路线
-      driving.search(new AMap.LngLat(118.822238, 31.936685), new AMap.LngLat(118.8286917127, 31.9388936987), function(status, result) {
-          // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
-          if (status === 'complete') {
-              log.success('绘制驾车路线完成')
-          } else {
-              log.error('获取驾车数据失败：' + result)
-          }
-      });
       
       AMap.plugin([
         'AMap.ToolBar',
@@ -154,12 +142,12 @@
       });
 
       var currentSelectedIndex = -1;
-      document.querySelector("#btn_search").onclick = function(){
-        alert("Found 4 parking lots near by!");
-        var parkingLocNearby = [[118.8286917127, 31.9388936987],
+      var parkingLocNearby = [[118.8286917127, 31.9388936987],
                                 [118.8239281095, 31.9364898820],
                                 [118.8270153096, 31.9442680310],
                                 [118.8302071383, 31.9423696782]];  // hardcoded so far
+      document.querySelector("#btn_search").onclick = function(){
+        log.success("Found 4 parking lots near by!");
         var markers = [];
         var lastSelectedIndex = -1;
         for (var i = 0; i < parkingLocNearby.length; i++) {
@@ -175,7 +163,7 @@
             lastSelectedIndex = i;
             currentSelectedIndex = 0;
             var msg = "Location: (" + 1 +  ")\nPrice: " + currentSelectedIndex;
-            alert(msg);
+            log.success(msg);
             markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
@@ -186,7 +174,7 @@
             lastSelectedIndex = 1;
             currentSelectedIndex = 1;
             var msg = "Location: (" + 1 +  ")\nPrice: " + currentSelectedIndex;
-            alert(msg);
+            log.success(msg);
             markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
@@ -197,7 +185,7 @@
             lastSelectedIndex = 2;
             currentSelectedIndex = 2;
             var msg = "Location: (" + 2 +  ")\nPrice: " + currentSelectedIndex;
-            alert(msg);
+            log.success(msg);
             markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
@@ -208,7 +196,7 @@
             lastSelectedIndex = 3;
             currentSelectedIndex = 3;
             var msg = "Location: (" + 3 +  ")\nPrice: " + currentSelectedIndex;
-            alert(msg);
+            log.success(msg);
             markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
@@ -218,8 +206,41 @@
 
       }
 
+      var driving;
       document.querySelector("#btn_guide").onclick = function(){
-        alert("Guiding to: " + currentSelectedIndex);
+        //构造路线导航类
+        if (driving) {
+          driving.clear();
+          map.remove(driving);
+        }
+        driving = new AMap.Driving({
+            map: map,
+            panel: "panel"
+        });
+        if (currentSelectedIndex < 0) {
+          log.error("No destination selected!");
+          return;
+        }
+        // 根据起终点经纬度规划驾车导航路线
+        driving.search(new AMap.LngLat(118.822238, 31.936685), new AMap.LngLat(parkingLocNearby[currentSelectedIndex][0], parkingLocNearby[currentSelectedIndex][1]), function(status, result) {
+            // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
+            if (status === 'complete') {
+                log.success('绘制驾车路线完成')
+            } else {
+                log.error('获取驾车数据失败：' + result)
+            }
+        });
+      }
+
+      document.querySelector("#btn_clear").onclick = function(){
+        map.clearMap();
+        if (driving) {
+          driving.clear();
+          map.remove(driving);
+        }
+        currentSelectedIndex = -1;
+        lastSelectedIndex = -1;
+        log.success("Map cleared.");
       }
 
     </script>
