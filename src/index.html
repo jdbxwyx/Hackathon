@@ -100,6 +100,14 @@
   </head>
   <body>
     <div id="container"  style="display:none"></div>
+    
+    <div class="input-card" style="width:24rem;">
+      <div class="input-item">
+        <button class="btn" id="btn_search" style="margin-right:1rem;">Search</button>
+        <button class="btn" id="btn_guide">Guide</button>
+      </div>
+    </div>
+
     <div id="panel"></div>
     <!-- 加载地图JSAPI脚本 -->
     <script src="https://webapi.amap.com/maps?v=1.4.14&key=9ab2d65e9c0c059c2f13176e93dda3bc"></script>
@@ -108,60 +116,111 @@
     <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
 
     <script>
-        var map = new AMap.Map('container', {
-            resizeEnable: true, //是否监控地图容器尺寸变化
-            zoom:16, //初始化地图层级
-            center: [118.822238, 31.936685] //初始化地图中心点
+      var map = new AMap.Map('container', {
+          resizeEnable: true, //是否监控地图容器尺寸变化
+          zoom:15, //初始化地图层级
+          center: [118.822238, 31.936685] //初始化地图中心点
+      });
+      var marker = new AMap.Marker({
+          icon: "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+          position: [118.822238,31.936685],
+          offset: new AMap.Pixel(-13, -30)
+      });
+      marker.setMap(map);
+      
+      //构造路线导航类
+      var driving = new AMap.Driving({
+          map: map,
+          panel: "panel"
+      }); 
+      // 根据起终点经纬度规划驾车导航路线
+      driving.search(new AMap.LngLat(118.822238, 31.936685), new AMap.LngLat(118.8286917127, 31.9388936987), function(status, result) {
+          // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
+          if (status === 'complete') {
+              log.success('绘制驾车路线完成')
+          } else {
+              log.error('获取驾车数据失败：' + result)
+          }
+      });
+      
+      AMap.plugin([
+        'AMap.ToolBar',
+      ], function () {
+        // 在图面添加工具条控件，工具条控件集成了缩放、平移、定位等功能按钮在内的组合控件
+        map.addControl(new AMap.ToolBar({
+          // 简易缩放模式，默认为 false
+          liteStyle: true
+        }));
+      });
+
+      var currentSelectedIndex = -1;
+      document.querySelector("#btn_search").onclick = function(){
+        alert("Found 4 parking lots near by!");
+        var parkingLocNearby = [[118.8286917127, 31.9388936987],
+                                [118.8239281095, 31.9364898820],
+                                [118.8270153096, 31.9442680310],
+                                [118.8302071383, 31.9423696782]];  // hardcoded so far
+        var markers = [];
+        var lastSelectedIndex = -1;
+        for (var i = 0; i < parkingLocNearby.length; i++) {
+          var marker = new AMap.Marker({
+            clickable: true,
+            position: parkingLocNearby[i]
+          });
+          markers.push(marker);
+          map.add(marker);
+        }
+
+        markers[0].on("click",function(e) {
+            lastSelectedIndex = i;
+            currentSelectedIndex = 0;
+            var msg = "Location: (" + 1 +  ")\nPrice: " + currentSelectedIndex;
+            alert(msg);
+            markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[3].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png');
         });
-        var marker = new AMap.Marker({
-            icon: "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
-            position: [118.822238,31.936685],
-            offset: new AMap.Pixel(-13, -30)
+        markers[1].on("click",function(e) {
+            lastSelectedIndex = 1;
+            currentSelectedIndex = 1;
+            var msg = "Location: (" + 1 +  ")\nPrice: " + currentSelectedIndex;
+            alert(msg);
+            markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[3].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png');
         });
-        marker.setMap(map);
-
-
-        //构造路线导航类
-        var driving = new AMap.Driving({
-            map: map,
-            panel: "panel"
-        }); 
-        // 根据起终点经纬度规划驾车导航路线
-        driving.search(new AMap.LngLat(118.822238, 31.936685), new AMap.LngLat(118.8286917127, 31.9388936987), function(status, result) {
-            // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
-            if (status === 'complete') {
-                log.success('绘制驾车路线完成')
-            } else {
-                log.error('获取驾车数据失败：' + result)
-            }
+        markers[2].on("click",function(e) {
+            lastSelectedIndex = 2;
+            currentSelectedIndex = 2;
+            var msg = "Location: (" + 2 +  ")\nPrice: " + currentSelectedIndex;
+            alert(msg);
+            markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[3].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png');
+        });
+        markers[3].on("click",function(e) {
+            lastSelectedIndex = 3;
+            currentSelectedIndex = 3;
+            var msg = "Location: (" + 3 +  ")\nPrice: " + currentSelectedIndex;
+            alert(msg);
+            markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[2].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[3].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
+            markers[3].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png');
         });
 
-        
-        // 自定义点标记内容
-        var markerContent = document.createElement("div");
-         // 点标记中的图标
-         var markerImg = document.createElement("img");
-        markerImg.className = "markerlnglat";
-        markerImg.src = "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png";
-        markerContent.appendChild(markerImg);
-        // 点标记中的文本
-        var markerSpan = document.createElement("span");
-        markerSpan.className = 'marker';
-        markerSpan.innerHTML = "Your Location";
-        markerContent.appendChild(markerSpan);
+      }
 
-        marker.setContent(markerContent); //更新点标记内容
-        // marker.setPosition([116.391467, 39.927761]); //更新点标记位置
-
-        AMap.plugin([
-          'AMap.ToolBar',
-        ], function () {
-          // 在图面添加工具条控件，工具条控件集成了缩放、平移、定位等功能按钮在内的组合控件
-          map.addControl(new AMap.ToolBar({
-            // 简易缩放模式，默认为 false
-            liteStyle: true
-          }));
-        });
+      document.querySelector("#btn_guide").onclick = function(){
+        alert("Guiding to: " + currentSelectedIndex);
+      }
 
     </script>
     <!-- template for rendering navigation items in the drawer -->
