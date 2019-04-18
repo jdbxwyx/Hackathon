@@ -119,7 +119,7 @@
     <script>
       var map = new AMap.Map('container', {
           resizeEnable: true, //是否监控地图容器尺寸变化
-          zoom:15, //初始化地图层级
+          zoom:14, //初始化地图层级
           center: [118.822238, 31.936685] //初始化地图中心点
       });
 
@@ -146,8 +146,9 @@
                                 [118.8239281095, 31.9364898820],
                                 [118.8270153096, 31.9442680310],
                                 [118.8302071383, 31.9423696782]];  // hardcoded so far
+      var pirceNearby = [0.1, 0.15, 0.2, 0.25];
       document.querySelector("#btn_search").onclick = function(){
-        log.success("Found 4 parking lots near by!");
+        log.success("Found 4 parking lots nearby!");
         var markers = [];
         var lastSelectedIndex = -1;
         for (var i = 0; i < parkingLocNearby.length; i++) {
@@ -162,7 +163,7 @@
         markers[0].on("click",function(e) {
             lastSelectedIndex = i;
             currentSelectedIndex = 0;
-            var msg = "Location: (" + 1 +  ")\nPrice: " + currentSelectedIndex;
+            var msg = "Price: $" + pirceNearby[currentSelectedIndex] + " per hour";
             log.success(msg);
             markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
@@ -173,7 +174,7 @@
         markers[1].on("click",function(e) {
             lastSelectedIndex = 1;
             currentSelectedIndex = 1;
-            var msg = "Location: (" + 1 +  ")\nPrice: " + currentSelectedIndex;
+            var msg = "Price: $" + pirceNearby[currentSelectedIndex] + " per hour";
             log.success(msg);
             markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
@@ -184,7 +185,7 @@
         markers[2].on("click",function(e) {
             lastSelectedIndex = 2;
             currentSelectedIndex = 2;
-            var msg = "Location: (" + 2 +  ")\nPrice: " + currentSelectedIndex;
+            var msg = "Price: $" + pirceNearby[currentSelectedIndex] + " per hour";
             log.success(msg);
             markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
@@ -195,7 +196,7 @@
         markers[3].on("click",function(e) {
             lastSelectedIndex = 3;
             currentSelectedIndex = 3;
-            var msg = "Location: (" + 3 +  ")\nPrice: " + currentSelectedIndex;
+            var msg = "Price: $" + pirceNearby[currentSelectedIndex] + " per hour";
             log.success(msg);
             markers[0].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');
             markers[1].setIcon('//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png');

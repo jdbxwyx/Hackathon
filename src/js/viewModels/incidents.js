@@ -6,11 +6,26 @@
 /*
  * Your incidents ViewModel code goes here
  */
-define(['ojs/ojcore', 'knockout', 'jquery', 'appController', 'ojs/ojmodule-element-utils'],
- function(oj, ko, $, app, moduleUtils) {
+define(['ojs/ojcore', 'knockout', 'jquery', 'appController', 'ojs/ojmodule-element-utils', 'ojs/ojarraydataprovider'],
+ function(oj, ko, $, app, moduleUtils, ArrayDataProvider) {
   
     function IncidentsViewModel() {
       var self = this;
+
+
+      var deptArray = [
+          {DepartmentId: 10, DepartmentName: 'Administration', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 20, DepartmentName: 'Marketing', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 30, DepartmentName: 'Purchasing', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 40, DepartmentName: 'Human Resources', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 50, DepartmentName: 'Accounting', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 60, DepartmentName: 'Operations', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 70, DepartmentName: 'Engineering', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 80, DepartmentName: 'Production', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 90, DepartmentName: 'Sales', LocationId: 200, ManagerId: 300},
+          {DepartmentId: 100, DepartmentName: 'Customer Service', LocationId: 200, ManagerId: 300}];
+      self.deptObservableArray = ko.observableArray(deptArray);
+      self.dataprovider = new ArrayDataProvider(self.deptObservableArray, {keyAttributes: 'DepartmentId'});
 
       // Header Config
       self.headerConfig = ko.observable({'view':[], 'viewModel':null});
