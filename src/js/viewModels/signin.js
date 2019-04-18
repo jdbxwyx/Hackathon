@@ -41,7 +41,7 @@
          }).catch(function() {
            // This won't happen in general, because then that means the entire offline data loading is broken.
            // Use default user name if at all this happens.
-           self.userName("Harry Calson");
+           self.userName("User1");
          });
        self.passWord('password');
        self.rememberUserName(['remember']);
@@ -51,7 +51,7 @@
      self.signIn = function() {
        if (self.groupValid() !== "valid")
          return;
-       alert("Welcome to Parking Zoon");
+       //alert("Welcome to Parking Zoon");
        var _url = "39.104.81.6:8000/api/v1.0";
        //$.post(_url);
        $.ajax({
