@@ -14,10 +14,11 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
       // Router setup
       self.router = oj.Router.rootInstance;
       self.router.configure({
-       'dashboard': {label: 'Current Parking', isDefault: true},
+       'dashboard': {label: 'Current Parking'},
        'incidents': {label: 'Parking History'},
        'customers': {label: 'My Settings'},
-       'profile': {label: 'My Wallet'},
+       'profile': {label: 'My Profile'},
+       'signin':{label:'Sign in', isDefault: true},
        'about': {label: 'About Us'}
       });
       oj.Router.defaults['urlAdapter'] = new oj.Router.urlParamAdapter();
@@ -49,7 +50,7 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-fire-icon-24'},
       {name: 'My Settings', id: 'customers',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-people-icon-24'},
-      {name: 'My Wallet', id: 'profile',
+      {name: 'Profile', id: 'profile',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-person-icon-24'},
       {name: 'About Us', id: 'about',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-info-icon-24'}
@@ -100,8 +101,130 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
         // See the override.css file to see when the content area is hidden.
         contentElem.classList.add('oj-complete');
       }
+
+      //get user info
+      self.getUserProfile = function () {
+        return new Promise(function(resolve, reject){
+          data.getUserProfile().then(function(response){
+            processUserProfile(response, resolve, reject);
+          }).catch(function(response){
+            oj.Logger.warn('Failed to connect to MCS. Loading from local data.');
+            self.usingMobileBackend(false);
+            //load local profile data
+            data.getUserProfile().then(function(response){
+              processUserProfile(response, resolve, reject);
+            });
+          });
+        });
+      }
+
+      function processUserProfile(response, resolve, reject) {
+        var result = JSON.parse(response);
+  
+        if (result) {
+          initialProfile = result;
+          self.userProfileModel(ko.mapping.fromJS(result));
+          resolve(self.userProfileModel);
+          return;
+        }
+  
+        // This won't happen in general, because then that means the entire offline data loading is broken.
+        var message = 'Failed to load user profile both online and offline.';
+        oj.Logger.error(message);
+        reject(message);
+      }
+
+      self.updateProfileData = function(updatedModel) {
+        imageHelper.loadImage(updatedModel().photo())
+          .then(function(base64Image) {
+            updatedModel().photo = base64Image;
+            initialProfile = ko.mapping.toJS(updatedModel);
+            return data.updateUserProfile(initialProfile)
+          })
+          .then(function() {
+            self.getUserProfile();
+          })
+          .catch(function(response){
+            oj.Logger.error(response);
+            self.connectionDrawer.showAfterUpdateMessage('Failed to save user profile');
+          });
+      };
+
+      // Revert changes to user profile
+      self.revertProfileData = function() {
+        self.userProfileModel(ko.mapping.fromJS(initialProfile));
+      };
+
     }
 
+        // initialise spen plugin
+        self.spenSupported = ko.observable(false);
+        function isSpenSupported() {
+          self.spenSupported(true);
+        }
+        function initialise() {
+          if (window.samsung) {
+            samsung.spen.isSupported(isSpenSupported, spenFail);
+          }
+        }
+        function spenFail(error) {
+          oj.Logger.error(error);
+        }
+        initialise();
+    
+    
+        var prevPopupOptions = null;
+    
+        self.setupPopup = function(imgSrc) {
+    
+          // Define the success function. The popup launches if the success function gets called.
+          var success = function(imageURI) {
+    
+            if(imageURI.length > 0) {
+              // SPen saves image to the same url
+              // add query and timestamp for versioning of the cache so it loads the latest
+              imageURI = imageURI + '?' + Date.now();
+              imgSrc(imageURI);
+            }
+    
+          }
+    
+          // Define the faliure function. An error message displays if there are issues with the popup.
+          var failure = function(msg) {
+          oj.Logger.error(msg);
+        }
+  
+        // If there are any previous popups, remove them first before creating a new popup
+        if (prevPopupOptions !== null){
+          // Call the removeSurfacePopup method from the SPen plugin
+          samsung.spen.removeSurfacePopup(prevPopupOptions.id, function() { }, failure);
+        }
+  
+        var popupOptions = {};
+        popupOptions.id = "popupId";
+  
+        popupOptions.sPenFlags = 0;
+  
+        // strip off suffix from compressed image
+        var imageURL;
+        if(imgSrc().lastIndexOf('?') > -1) {
+          imageURL = imgSrc().slice(0, imgSrc().lastIndexOf('?'));
+        } else {
+          imageURL = imgSrc();
+        }
+  
+        popupOptions.imageUri = imageURL;
+        popupOptions.imageUriScaleType = samsung.spen.IMAGE_URI_MODE_STRETCH;
+        popupOptions.sPenFlags = samsung.spen.FLAG_PEN | samsung.spen.FLAG_ERASER | samsung.spen.FLAG_UNDO_REDO |
+                              samsung.spen.FLAG_PEN_SETTINGS;
+        popupOptions.returnType = samsung.spen.RETURN_TYPE_IMAGE_URI;
+  
+        //Launch the popup
+        prevPopupOptions = popupOptions;
+        samsung.spen.launchSurfacePopup(popupOptions, success, failure);
+  
+      };
+      
     return new ControllerViewModel();
   }
 );

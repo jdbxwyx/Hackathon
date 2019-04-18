@@ -51,7 +51,7 @@
      self.signIn = function() {
        if (self.groupValid() !== "valid")
          return;
-       alert("hello world");
+       alert("Welcome to Parking Zoon");
        var _url = "39.104.81.6:8000/api/v1.0";
        //$.post(_url);
        $.ajax({
