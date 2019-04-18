@@ -17,7 +17,7 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
        'dashboard': {label: 'Current Parking'},
        'incidents': {label: 'Parking History'},
        'customers': {label: 'My Settings'},
-       'profile': {label: 'My Profile'},
+       'profile': {label: 'Scan QR Code to Park'},
        'signin':{label:'Sign in', isDefault: true},
        'about': {label: 'About Us'}
       });
@@ -50,7 +50,7 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-fire-icon-24'},
       {name: 'My Settings', id: 'customers',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-people-icon-24'},
-      {name: 'Profile', id: 'profile',
+      {name: 'QR Code', id: 'profile',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-person-icon-24'},
       {name: 'About Us', id: 'about',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-info-icon-24'}
