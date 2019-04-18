@@ -3,57 +3,75 @@
  * Copyright (c) 2014, 2019, Oracle and/or its affiliates.
  * The Universal Permissive License (UPL), Version 1.0
  */
-/*
- * Your profile ViewModel code goes here
+/**
+ * Copyright (c) 2014, 2019, Oracle and/or its affiliates.
+ * The Universal Permissive License (UPL), Version 1.0
  */
-define(['ojs/ojcore', 'knockout', 'jquery', 'appController', 'ojs/ojmodule-element-utils'],
- function(oj, ko, $, app, moduleUtils) {
-  
-    function ProfileViewModel() {
-      var self = this;
 
-      // Header Config
-      self.headerConfig = ko.observable({'view':[], 'viewModel':null});
-      moduleUtils.createView({'viewPath':'views/header.html'}).then(function(view) {
-        self.headerConfig({'view':view, 'viewModel':new app.getHeaderModel()})
-      })
+ // signin page viewModel
+ // In a real app, replace it with your authentication and logic
+ 'use strict';
+ define(['ojs/ojcore', 'knockout', 'jquery', 'appController',
+         'ojs/ojrouter',
+         'ojs/ojknockout',
+         'ojs/ojcheckboxset',
+         'ojs/ojinputtext',
+         'ojs/ojbutton',
+         'ojs/ojvalidationgroup',
+         'ojs/ojanimation'], function(oj, ko, $, app) {
+   function signin() {
+     var self = this;
+ 
+     self.transitionCompleted = function() {
+       app.setFocusAfterModuleLoad('signInBtn');
+       var animateOptions = { 'delay': 0, 'duration': '1s', 'timingFunction': 'ease-out' };
+       oj.AnimationUtils['fadeIn']($('.demo-signin-bg')[0], animateOptions);
+     }
+ 
+     self.groupValid = ko.observable();
+     self.userName = ko.observable();
+     self.passWord = ko.observable();
+     self.rememberUserName = ko.observable();
+ 
+     // First time, rememberUserName in sessionStorage will not be set. In this case we default to true.
+     if (window.sessionStorage.rememberUserName === undefined || window.sessionStorage.rememberUserName === 'true') {
+       app.getUserProfile()
+         .then(function(userProfile) {
+           self.userName(userProfile.firstName() + ' ' + userProfile.lastName());
+         }).catch(function() {
+           // This won't happen in general, because then that means the entire offline data loading is broken.
+           // Use default user name if at all this happens.
+           self.userName("Harry Calson");
+         });
+       self.passWord('password');
+       self.rememberUserName(['remember']);
+     }
+ 
+     // Replace with sign in authentication
+     self.signIn = function() {
+       if (self.groupValid() !== "valid")
+         return;
+       alert("hello world");
+       var _url = "39.104.81.6:8000/api/v1.0";
+       //$.post(_url);
+       $.ajax({
+         type: 'POST',
+         url: _url
+         // data: data,
+         // success: success,
+         // dataType: dataType
+       });
+ 
+       window.sessionStorage.rememberUserName = '' + (self.rememberUserName() && self.rememberUserName().indexOf('remember') != -1);
+       //app.pushClient.registerForNotifications();
+       oj.Router.rootInstance.go('dashboard');
 
-      // Below are a set of the ViewModel methods invoked by the oj-module component.
-      // Please reference the oj-module jsDoc for additional information.
+      var mapDiv = document.getElementById('container');
+      mapDiv.style.display = "block";
 
-      /**
-       * Optional ViewModel method invoked after the View is inserted into the
-       * document DOM.  The application can put logic that requires the DOM being
-       * attached here. 
-       * This method might be called multiple times - after the View is created 
-       * and inserted into the DOM and after the View is reconnected 
-       * after being disconnected.
-       */
-      self.connected = function() {
-        // Implement if needed
-      };
-
-      /**
-       * Optional ViewModel method invoked after the View is disconnected from the DOM.
-       */
-      self.disconnected = function() {
-        // Implement if needed
-      };
-
-      /**
-       * Optional ViewModel method invoked after transition to the new View is complete.
-       * That includes any possible animation between the old and the new View.
-       */
-      self.transitionCompleted = function() {
-        // Implement if needed
-      };
-    }
-
-    /*
-     * Returns a constructor for the ViewModel so that the ViewModel is constructed
-     * each time the view is displayed.  Return an instance of the ViewModel if
-     * only one instance of the ViewModel is needed.
-     */
-    return new ProfileViewModel();
-  }
-);
+     };
+ 
+   }
+   return signin;
+ });
+ 

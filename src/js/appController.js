@@ -14,10 +14,10 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
       // Router setup
       self.router = oj.Router.rootInstance;
       self.router.configure({
-       'dashboard': {label: 'Current Parking', isDefault: true},
+       'dashboard': {label: 'Current Parking'},
        'incidents': {label: 'Parking History'},
        'customers': {label: 'My Settings'},
-       'profile': {label: 'My Wallet'},
+       'profile': {label: 'My Profile', isDefault: true},
        'about': {label: 'About Us'}
       });
       oj.Router.defaults['urlAdapter'] = new oj.Router.urlParamAdapter();
@@ -49,7 +49,7 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-fire-icon-24'},
       {name: 'My Settings', id: 'customers',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-people-icon-24'},
-      {name: 'My Wallet', id: 'profile',
+      {name: 'Profile', id: 'profile',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-person-icon-24'},
       {name: 'About Us', id: 'about',
        iconClass: 'oj-navigationlist-item-icon demo-icon-font-24 demo-info-icon-24'}
@@ -99,6 +99,22 @@ define(['ojs/ojcore', 'knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockout'
         // Add oj-complete marker class to signal that the content area can be unhidden.
         // See the override.css file to see when the content area is hidden.
         contentElem.classList.add('oj-complete');
+      }
+
+      //get user info
+      self.getUserProfile = function () {
+        return new Promise(function(resolve, reject){
+          data.getUserProfile().then(function(response){
+            processUserProfile(response, resolve, reject);
+          }).catch(function(response){
+            oj.Logger.warn('Failed to connect to MCS. Loading from local data.');
+            self.usingMobileBackend(false);
+            //load local profile data
+            data.getUserProfile().then(function(response){
+              processUserProfile(response, resolve, reject);
+            });
+          });
+        });
       }
     }
 
